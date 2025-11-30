@@ -30,5 +30,6 @@ jobs:
       env:
         CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
         CLOCKIFY_WORKSPACE_ID: ${{ secrets.CLOCKIFY_WORKSPACE_ID }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_BOT_TRIGGER_URL: ${{ secrets.SLACK_BOT_TRIGGER_URL }}
+        TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
         TARGET_HOURS: ${{ vars.TARGET_HOURS || '8.0' }}

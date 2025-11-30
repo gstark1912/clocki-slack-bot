@@ -5,7 +5,8 @@
       "environmentVariables": {
         "CLOCKIFY_API_KEY": "YOUR_API_KEY_HERE",
         "CLOCKIFY_WORKSPACE_ID": "YOUR_WORKSPACE_ID_HERE",
-        "SLACK_BOT_TOKEN": "YOUR_SLACK_TOKEN_HERE",
+        "SLACK_BOT_TRIGGER_URL": "YOUR_TRIGGER_URL_HERE",
+        "TARGET_EMAILS": "email1@example.com;email2@example.com",
         "TARGET_HOURS": "8.0"
       }
     }

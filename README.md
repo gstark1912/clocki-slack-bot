@@ -1,36 +1,48 @@
-# Clockify Slack Bot Walkthrough
+# Clockify Slack Bot
 
-I have successfully implemented the Clockify Slack Bot console application and the GitHub Actions workflow.
+A C# console application that checks Clockify hours for specific users and notifies them via Slack if they haven't reached their daily target.
 
-## Changes Implemented
+## Features
 
-### 1. Project Files
-- **[TimeChecker.csproj](file:///c:/Users/Germa/source/repos/clocki-slack-bot/TimeChecker.csproj)**: .NET 8 Console App project file.
-- **[Program.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/Program.cs)**: Main logic.
-    - Reads config from Environment Variables.
-    - Fetches daily summary from Clockify.
-    - Calculates hours per user.
-    - Looks up Slack ID by email.
-    - Sends notification if under target.
+- **Clockify Integration**: Fetches daily summary reports and user details.
+- **Slack Integration**: Sends notifications via Webhook Trigger URL.
+- **Targeted Checking**: Checks specific emails defined in configuration.
+- **GitHub Actions**: Automated daily checks (Mon-Fri).
 
-### 2. GitHub Actions
-- **[.github/workflows/daily_check.yml](file:///c:/Users/Germa/source/repos/clocki-slack-bot/.github/workflows/daily_check.yml)**:
-    - Runs Mon-Fri at 18:00 UTC.
-    - Injects secrets: `CLOCKIFY_API_KEY`, `CLOCKIFY_WORKSPACE_ID`, `SLACK_BOT_TOKEN`.
+## Configuration
 
-## Verification Results
+The application requires the following environment variables:
 
-### Build Verification
-I ran `dotnet build` and it succeeded.
+| Variable | Description |
+|----------|-------------|
+| `CLOCKIFY_API_KEY` | Your Clockify API Key. |
+| `CLOCKIFY_WORKSPACE_ID` | The ID of the Clockify Workspace. |
+| `SLACK_BOT_TRIGGER_URL` | The Slack Webhook Trigger URL for sending messages. |
+| `TARGET_EMAILS` | Semicolon-separated list of emails to check (e.g., `user1@example.com;user2@example.com`). |
+| `TARGET_HOURS` | (Optional) Daily target hours (default: 8.0). |
 
+## Project Structure
+
+- **[Program.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/Program.cs)**: Main entry point and orchestration logic.
+- **[ClockifyService.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/ClockifyService.cs)**: Handles Clockify API interactions.
+- **[SlackService.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/SlackService.cs)**: Handles Slack API interactions via Trigger URL.
+- **[Models.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/Models.cs)**: Data Transfer Objects.
+
+## GitHub Actions
+
+The workflow is defined in **[.github/workflows/daily_check.yml](file:///c:/Users/Germa/source/repos/clocki-slack-bot/.github/workflows/daily_check.yml)**.
+
+### Setup Secrets
+To run this in GitHub Actions, configure the following Repository Secrets:
+- `CLOCKIFY_API_KEY`
+- `CLOCKIFY_WORKSPACE_ID`
+- `SLACK_BOT_TRIGGER_URL`
+- `TARGET_EMAILS`
+
+## Local Development
+
+Update `Properties/launchSettings.json` with your keys to run locally.
+
+```bash
+dotnet run
 ```
-Build succeeded in 2.8s
-```
-
-### Next Steps for User
-1.  **Commit and Push** the code to GitHub.
-2.  **Configure Secrets** in your GitHub Repository settings:
-    - `CLOCKIFY_API_KEY`
-    - `CLOCKIFY_WORKSPACE_ID`
-    - `SLACK_BOT_TOKEN`
-3.  **Test Manually**: Go to the "Actions" tab in GitHub and run the "Daily Time Check" workflow manually to verify it works with real keys.
