@@ -1,0 +1,34 @@
+name: Daily Time Check
+
+on:
+  schedule:
+    # Monday to Friday at 18:00 UTC
+    - cron: '0 18 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  check-hours:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore TimeChecker.csproj
+
+    - name: Build
+      run: dotnet build TimeChecker.csproj --no-restore
+
+    - name: Run TimeChecker
+      run: dotnet run --project TimeChecker.csproj
+      env:
+        CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
+        CLOCKIFY_WORKSPACE_ID: ${{ secrets.CLOCKIFY_WORKSPACE_ID }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        TARGET_HOURS: ${{ vars.TARGET_HOURS || '8.0' }}
