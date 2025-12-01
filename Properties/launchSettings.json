@@ -3,11 +3,11 @@
     "TimeChecker": {
       "commandName": "Project",
       "environmentVariables": {
-        "CLOCKIFY_API_KEY": "YOUR_API_KEY_HERE",
-        "CLOCKIFY_WORKSPACE_ID": "YOUR_WORKSPACE_ID_HERE",
-        "SLACK_BOT_TRIGGER_URL": "YOUR_TRIGGER_URL_HERE",
-        "TARGET_EMAILS": "email1@example.com;email2@example.com",
-        "TARGET_HOURS": "8.0"
+        "CLOCKIFY_API_KEY": "YjU5YWE1ZDgtYzM2NC00NmUxLTg0ZWMtOTcyNDc5MGNiNDli",
+        "CLOCKIFY_WORKSPACE_ID": "66ba26ba42e1a97ae86c14ed",
+        "SLACK_BOT_TRIGGER_URL": "https://hooks.slack.com/triggers/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",
+        "TARGET_EMAILS": "danel@ingenima.com;karen@ingenima.com",
+        "TARGET_HOURS": "4.0"
       }
     }
   }

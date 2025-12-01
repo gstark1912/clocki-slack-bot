@@ -30,6 +30,12 @@ await Task.WhenAll(usersTask, reportTask);
 var allUsers = usersTask.Result;
 var clockifyData = reportTask.Result;
 
+if(allUsers?.Count == 0)
+{
+    Console.WriteLine("No users found in Clockify workspace.");
+    Environment.Exit(1);
+}
+
 if (clockifyData?.GroupOne == null)
 {
     Console.WriteLine("No report data found for today. Checking if users have 0 hours...");
@@ -65,7 +71,7 @@ foreach (var email in targetEmails)
     if (totalHours < targetHours)
     {
         Console.WriteLine($"User {user.Name} ({email}) has {totalHours:F2} hours. Target is {targetHours}. Notifying...");
-        await slackService.SendMessageAsync(email, $"Hola, hoy tienes cargadas {totalHours:F2} horas. Por favor completa tus horas del día.");
+        await slackService.SendMessageAsync(email, $"Hola! Hoy tenés cargadas {totalHours:F2} horas. Por favor completá tus horas del día.");
     }
     else
     {

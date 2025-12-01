@@ -47,7 +47,7 @@ namespace ClockiSlackBot
         {
             var url = $"https://api.clockify.me/api/v1/workspaces/{workspaceId}/users";
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Add("X-Api-Key", _apiKey);
+            requestMessage.Headers.Add("x-api-key", _apiKey);
 
             var response = await _httpClient.SendAsync(requestMessage);
             if (!response.IsSuccessStatusCode)
