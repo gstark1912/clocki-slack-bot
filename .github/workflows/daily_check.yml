@@ -2,8 +2,8 @@ name: Daily Time Check
 
 on:
   schedule:
-    # Monday to Friday at 18:00 UTC
-    - cron: '0 17 * * 1-5'
+    # Monday to Friday at 17:00 UTC
+    - cron: '0 20 * * 1-5'
   workflow_dispatch:
 
 jobs:
