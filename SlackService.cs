@@ -19,7 +19,7 @@ namespace ClockiSlackBot
         {
             var payload = new
             {
-                email = "german@camsideas.com.ar",
+                email = email,
                 mensaje = text
             };
 
