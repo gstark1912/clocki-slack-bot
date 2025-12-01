@@ -7,6 +7,11 @@ string? slackBotTriggerUrl = Environment.GetEnvironmentVariable("SLACK_BOT_TRIGG
 string? targetEmailsEnv = Environment.GetEnvironmentVariable("TARGET_EMAILS");
 double targetHours = double.TryParse(Environment.GetEnvironmentVariable("TARGET_HOURS"), out double t) ? t : 8.0;
 
+Console.WriteLine($"Clockify API Key: {clockifyApiKey}");
+Console.WriteLine($"Clockify Workspace ID: {clockifyWorkspaceId}");
+Console.WriteLine($"Slack Bot Trigger URL: {slackBotTriggerUrl}");
+Console.WriteLine($"Target emails: {targetEmailsEnv}");
+
 if (string.IsNullOrEmpty(clockifyApiKey) || string.IsNullOrEmpty(clockifyWorkspaceId) || string.IsNullOrEmpty(slackBotTriggerUrl) || string.IsNullOrEmpty(targetEmailsEnv))
 {
     Console.WriteLine("Error: Missing required environment variables (CLOCKIFY_API_KEY, CLOCKIFY_WORKSPACE_ID, SLACK_BOT_TRIGGER_URL, TARGET_EMAILS).");
