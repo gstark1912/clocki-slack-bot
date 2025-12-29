@@ -1,0 +1,14 @@
+{
+    "stories": [
+        {
+            "id": 1,
+            "title": "Salvar al Gatito Ramirez",
+            "intro": "Esta semana el Agente Meow nos informa que el Gatito Ramirez está atrapado en un árbol binario invertido gigante.",
+            "dailyFail": "¡Alerta! @user no completó sus horas. Ramirez está maullando de miedo.",
+            "riskHigh": "El equipo está al 60% de la meta y es Jueves. Ramirez está resbalando...",
+            "riskMedium": "Vamos bien, pero no bajemos la guardia.",
+            "win": "¡Misión cumplida! Ramirez ha sido rescatado gracias a las horas del equipo. +1 Gatito.",
+            "loss": "Lamentablemente, no llegamos a tiempo. Ramirez ha caído al vacío (cayó de pie, pero perdió una vida)."
+        }
+    ]
+}
