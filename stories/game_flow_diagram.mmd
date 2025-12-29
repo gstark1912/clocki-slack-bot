@@ -1,0 +1,32 @@
+```mermaid
+flowchart TD
+    Start([Inicio de ejecución del Bot]) --> LoadGS[Leer GameState]
+    LoadGS --> StateCheck{GameState}
+    StateCheck -- "NotStarted" --> NotStarted[NotStarted]
+    StateCheck -- "InProgress" --> InProgress[InProgress]
+    NotStarted --> ChooseStory[Seleccionar historia de stories.json]
+    ChooseStory --> SendIntro[Enviar intro al canal general]
+    SendIntro --> SetInProg[Actualizar GameState a InProgress]
+    SetInProg --> EndMorning[Fin (ejecución lunes AM)]
+    InProgress --> DailyLogic[CheckDaily (por cada usuario)]
+    subgraph DailyLogicDetail [CheckDaily]
+        CheckHours[Analizar horas de HOY (cerca del fin del día)]
+        CheckHours --> UserStatus{¿Usuario cumplió su meta?}
+        UserStatus -- No --> SendDM[Enviar DM de advertencia narrativa]
+        UserStatus -- Sí --> NoAction[Sin acción]
+    end
+    DailyLogic --> DailyLogicDetail
+    DailyLogicDetail --> AnteultimoCheck{¿EsAnteultimoDiaDeLaSemana? && Meta < 60%}
+    AnteultimoCheck -- Sí --> SendWarning[Enviar advertencia al canal general]
+    AnteultimoCheck -- No --> ContinueAfterAnteultimo[Continuar]
+    ContinueAfterAnteultimo --> EndWeekCheck{¿EsUltimoDiaDeLaSemana?}
+    EndWeekCheck -- No --> SaveState[Guardar GameState (mantiene InProgress)]
+    EndWeekCheck -- Sí --> EndWeek[Fin de semana]
+    EndWeek --> VictoryCheck{¿Equipo cumplió la meta semanal?}
+    VictoryCheck -- Sí --> Win[Victoria]
+    VictoryCheck -- No --> Loss[Derrota]
+    Win --> ResetState[Actualizar GameState a NotStarted]
+    Loss --> ResetState
+    ResetState --> SaveState
+    SaveState --> End([Fin de ejecución del Bot])
+```

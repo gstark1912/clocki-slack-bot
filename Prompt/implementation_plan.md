@@ -59,11 +59,11 @@ Refactor the existing console application into a modular architecture and implem
 
 ### Gamification & Logic
 #### [NEW] [GameService.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/GameService.cs)
-- **Day Logic**: The service will accept the `currentDate` and decide the action:
-    - **Monday**: StartNewWeek() -> Select Story -> Send Intro.
-    - **Mon-Fri**: CheckDaily() -> Send DMs.
-    - **Thursday**: CheckRisk() -> Send Public Warning.
-    - **Friday**: EndWeek() -> Calc Result -> Send Outcome -> Update Streak -> Save State.
+- **Day Logic**: The service will read `GameState` and the current date to decide the action:
+    - **NotStarted** (first day of the week): `StartNewWeek()` → select story → send intro → set `GameState` to **InProgress**.
+    - **InProgress** (daily): `CheckDaily()` → analyze today's hours → send DMs as needed.
+    - **Anteultimo** (penultimate day) **and** weekly progress < 60 %: `SendWarning()` → public channel warning.
+    - **UltimoDia** (last day of the week): `EndWeek()` → calculate result → send outcome → update streak → reset `GameState` to **NotStarted**.
 - **Vacation Logic**: Check `vacations.json` or Clockify "Time Off" project to exclude users from daily targets.
 
 #### [NEW] [Models.cs](file:///c:/Users/Germa/source/repos/clocki-slack-bot/Models.cs)
