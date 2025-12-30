@@ -5,6 +5,7 @@ namespace ClockiSlackBot.Config
         string WorkspaceId { get; }
         string[] TargetEmails { get; }
         double TargetHours { get; }
+        double WarningThreshold { get; }
         string ApiKey { get; }
         string SlackBotTriggerUrl { get; }  
     }

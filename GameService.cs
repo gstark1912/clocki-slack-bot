@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -15,20 +14,20 @@ namespace ClockiSlackBot
     {
         private readonly IClockifyService _clockifyService;
         private readonly ISlackService _slackService;
+        private readonly IWeekService _weekService;
+        private readonly IDbService _dbService;
         private readonly IGameConfig _config;
         private readonly string _dataDir = "data";
         private readonly string _gameStatePath;
-        private readonly string _storiesPath;
-        private readonly string _vacationsPath;
 
-        public GameService(IClockifyService clockifyService, ISlackService slackService, IGameConfig config)
+        public GameService(IClockifyService clockifyService, ISlackService slackService, IWeekService weekService, IDbService dbService, IGameConfig config)
         {
             _clockifyService = clockifyService;
             _slackService = slackService;
+            _weekService = weekService;
+            _dbService = dbService;
             _config = config;
             _gameStatePath = Path.Combine(_dataDir, "gamestate.json");
-            _storiesPath = Path.Combine(_dataDir, "stories.json");
-            _vacationsPath = Path.Combine(_dataDir, "vacations.json");
         }
 
         private GameState LoadState()
@@ -49,53 +48,29 @@ namespace ClockiSlackBot
             File.WriteAllText(_gameStatePath, json);
         }
 
-        private Story LoadCurrentStory(int storyId)
-        {
-            var json = File.ReadAllText(_storiesPath);
-            var doc = JsonSerializer.Deserialize<StoriesDocument>(json)!;
-            return doc.Stories.Find(s => s.Id == storyId) ?? doc.Stories[0];
-        }
-
-        private bool IsVacation(DateTime date, string email)
-        {
-            if (!File.Exists(_vacationsPath)) return false;
-            var json = File.ReadAllText(_vacationsPath);
-            var vac = JsonSerializer.Deserialize<VacationsDocument>(json)!;
-            foreach (var entry in vac.Vacations)
-            {
-                if (entry.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && entry.Date.Date == date.Date)
-                    return true;
-            }
-            return false;
-        }
-
         public async Task RunAsync()
         {
             var today = DateTime.UtcNow.Date;
             var state = LoadState();
-            var dayOfWeek = today.DayOfWeek;
 
-            // Determine week start (Monday)
-            var weekStart = today.AddDays(-(int)dayOfWeek + (dayOfWeek == DayOfWeek.Sunday ? -6 : 1));
-
-            // If we are on the first day of a new week, start new week
-            if (state.Status == GameStatus.NotStarted && state.LastUpdate.Date < weekStart)
+            if (_weekService.ShouldStartNewWeek(state))
             {
                 await StartNewWeekAsync(state);
                 state = LoadState(); // reload after start
+                return;
             }
 
             // Daily check
             await CheckDailyAsync(state);
 
-            // Penultimate day warning (Thursday if week is Mon-Fri)
-            if (dayOfWeek == DayOfWeek.Thursday)
+            // Alert day warning (Thursday)
+            if (_weekService.IsAlertDay(today))
             {
                 await SendWarningAsync(state);
             }
 
-            // End of week (Friday)
-            if (dayOfWeek == DayOfWeek.Friday)
+            // Final day (Friday)
+            if (_weekService.IsFinalDay(today))
             {
                 await EndWeekAsync(state);
             }
@@ -103,7 +78,7 @@ namespace ClockiSlackBot
 
         private async Task StartNewWeekAsync(GameState state)
         {
-            var story = LoadCurrentStory(state.CurrentStoryId);
+            var story = _dbService.GetStory(state.CurrentStoryId);
             await _slackService.SendMessageAsync("general", story.Intro);
             state.Status = GameStatus.InProgress;
             state.LastUpdate = DateTime.UtcNow;
@@ -117,14 +92,14 @@ namespace ClockiSlackBot
             var report = await _clockifyService.GetDailySummaryAsync(DateTime.UtcNow);
             foreach (var email in targetEmails)
             {
-                if (IsVacation(DateTime.UtcNow, email)) continue;
+                if (_dbService.IsVacation(DateTime.UtcNow, email)) continue;
                 var user = users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
                 if (user == null) continue;
                 var entry = report?.GroupOne?.FirstOrDefault(g => g.Name.Equals(user.Name, StringComparison.OrdinalIgnoreCase));
                 double hours = entry?.Duration / 3600.0 ?? 0.0;
                 if (hours < _config.TargetHours)
                 {
-                    var story = LoadCurrentStory(state.CurrentStoryId);
+                    var story = _dbService.GetStory(state.CurrentStoryId);
                     var message = $"{story.DailyFail} (tienes {hours:F2}h, objetivo {_config.TargetHours}h).";
                     await _slackService.SendMessageAsync(email, message);
                 }
@@ -135,8 +110,7 @@ namespace ClockiSlackBot
 
         private async Task<double> ComputeWeeklyProgressAsync()
         {
-            // Week starts on Monday
-            var weekStart = DateTime.UtcNow.AddDays(-(int)DateTime.UtcNow.DayOfWeek + (DateTime.UtcNow.DayOfWeek == DayOfWeek.Sunday ? -6 : 1));
+            var weekStart = _weekService.GetWeekStart(DateTime.UtcNow);
             var report = await _clockifyService.GetDailySummaryAsync(weekStart);
             var users = await _clockifyService.GetUsersAsync();
             double totalSeconds = report?.GroupOne?.Sum(g => g.Duration) ?? 0;
@@ -147,11 +121,11 @@ namespace ClockiSlackBot
 
         private async Task SendWarningAsync(GameState state)
         {
-            // Compute weekly progress and send warning only if below 60%
+            // Compute weekly progress and send warning only if below threshold
             double progress = await ComputeWeeklyProgressAsync();
-            if (progress < 60.0)
+            if (progress < _config.WarningThreshold)
             {
-                var story = LoadCurrentStory(state.CurrentStoryId);
+                var story = _dbService.GetStory(state.CurrentStoryId);
                 await _slackService.SendMessageAsync("general", story.RiskHigh);
             }
         }
@@ -164,7 +138,7 @@ namespace ClockiSlackBot
             var report = await _clockifyService.GetDailySummaryAsync(weekStart); // simplistic: use first day summary as placeholder
             // In real implementation we'd aggregate week data; here we just assume success if any entry exists
             bool success = report?.GroupOne?.Count > 0; // placeholder logic
-            var story = LoadCurrentStory(state.CurrentStoryId);
+            var story = _dbService.GetStory(state.CurrentStoryId);
             var outcome = success ? story.Win : story.Loss;
             await _slackService.SendMessageAsync("general", outcome);
 
@@ -175,18 +149,13 @@ namespace ClockiSlackBot
                 state.TeamStreak = 0;
 
             // advance story id
-            state.CurrentStoryId = (state.CurrentStoryId % LoadStoriesCount()) + 1;
+            state.CurrentStoryId = (state.CurrentStoryId % _dbService.GetStoriesCount()) + 1;
             state.Status = GameStatus.NotStarted;
             state.LastUpdate = DateTime.UtcNow;
             SaveState(state);
         }
 
-        private int LoadStoriesCount()
-        {
-            var json = File.ReadAllText(_storiesPath);
-            var doc = JsonSerializer.Deserialize<StoriesDocument>(json)!;
-            return doc.Stories.Count;
-        }
+
     }
 
     // Helper DTOs for JSON files

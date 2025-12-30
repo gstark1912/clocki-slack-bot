@@ -16,8 +16,12 @@ static IGameConfig CreateGameConfig()
         ?? throw new ArgumentNullException("TARGET_HOURS");
     if (!double.TryParse(targetHoursStr, out double targetHours))
         throw new ArgumentException("Invalid TARGET_HOURS value", "TARGET_HOURS");
+    
+    var warningThresholdStr = Environment.GetEnvironmentVariable("WARNING_THRESHOLD") ?? "60.0";
+    if (!double.TryParse(warningThresholdStr, out double warningThreshold))
+        throw new ArgumentException("Invalid WARNING_THRESHOLD value", "WARNING_THRESHOLD");
 
-    return new GameConfig(workspaceId, targetEmails.Split(','), targetHours, clockifyApiKey, slackBotTriggerUrl);
+    return new GameConfig(workspaceId, targetEmails.Split(','), targetHours, warningThreshold, clockifyApiKey, slackBotTriggerUrl);
 }
 
 var gameConfig = CreateGameConfig();
@@ -25,6 +29,8 @@ var gameConfig = CreateGameConfig();
 using var httpClient = new HttpClient();
 IClockifyService clockifyService = new ClockifyService(httpClient, gameConfig);
 ISlackService slackService = new SlackService(httpClient, gameConfig);
+IWeekService weekService = new WeekService();
+IDbService dbService = new DbService();
 
-var gameService = new GameService(clockifyService, slackService, gameConfig);
+var gameService = new GameService(clockifyService, slackService, weekService, dbService, gameConfig);
 await gameService.RunAsync();
