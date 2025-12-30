@@ -3,6 +3,7 @@ using ClockiSlackBot.Config;
 using ClockiSlackBot.Services;
 using ClockiSlackBot.Repositories;
 using ClockiSlackBot.Abstractions;
+using ClockiSlackBot.Logger;
 
 static IGameConfig CreateGameConfig()
 {
@@ -27,10 +28,11 @@ static IGameConfig CreateGameConfig()
 }
 
 var gameConfig = CreateGameConfig();
+var logger = new LoggerService();
 
 using var httpClient = new HttpClient();
-IClockifyService clockifyService = new ClockifyService(httpClient, gameConfig);
-ISlackService slackService = new SlackService(httpClient, gameConfig);
+IClockifyService clockifyService = new ClockifyService(httpClient, gameConfig, logger);
+ISlackService slackService = new SlackService(httpClient, gameConfig, logger);
 IWeekService weekService = new WeekService();
 IDbService dbService = new DbService();
 
@@ -39,5 +41,5 @@ IGameStateRepository stateRepo = new GameStateRepository();
 IProgressCalculator progressCalculator = new ProgressCalculator(clockifyService, weekService, dbService, gameConfig);
 IGameFlowOrchestrator flowOrchestrator = new GameFlowOrchestrator(slackService, dbService, progressCalculator, stateRepo, gameConfig);
 
-var gameService = new GameService(stateRepo, flowOrchestrator, weekService);
+var gameService = new GameService(stateRepo, flowOrchestrator, weekService, logger);
 await gameService.RunAsync();
