@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
+using ClockiSlackBot.Models;
 
-namespace ClockiSlackBot.Services
+namespace ClockiSlackBot.Abstractions
 {
     public interface IDbService
     {

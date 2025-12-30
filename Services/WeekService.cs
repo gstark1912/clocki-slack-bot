@@ -1,5 +1,6 @@
 using System;
 using ClockiSlackBot.Models;
+using ClockiSlackBot.Abstractions;
 
 namespace ClockiSlackBot.Services
 {

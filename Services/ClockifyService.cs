@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System;
 using ClockiSlackBot.Config;
 using ClockiSlackBot.Models;
+using ClockiSlackBot.Abstractions;
 
 namespace ClockiSlackBot.Services
 {

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClockiSlackBot.Models;
 
-namespace ClockiSlackBot.Services
+namespace ClockiSlackBot.Abstractions
 {
     public interface IClockifyService
     {
         Task<ClockifySummaryResponse?> GetDailySummaryAsync(DateTime date);
-    Task<List<ClockifyUser>> GetUsersAsync();
+        Task<List<ClockifyUser>> GetUsersAsync();
     }
 }

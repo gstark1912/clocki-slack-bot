@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using ClockiSlackBot.Config;
+using ClockiSlackBot.Abstractions;
 
 namespace ClockiSlackBot.Services
 {

@@ -1,7 +1,7 @@
 using System;
 using ClockiSlackBot.Models;
 
-namespace ClockiSlackBot.Services
+namespace ClockiSlackBot.Abstractions
 {
     public interface IWeekService
     {
