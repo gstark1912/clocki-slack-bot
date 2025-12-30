@@ -33,3 +33,12 @@ jobs:
         SLACK_BOT_TRIGGER_URL: ${{ secrets.SLACK_BOT_TRIGGER_URL }}
         TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
         TARGET_HOURS: ${{ vars.TARGET_HOURS || '4.0' }}
+    - name: Commit gamestate.json
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add data/gamestate.json
+        git commit -m "Update gamestate"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

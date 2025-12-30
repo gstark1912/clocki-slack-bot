@@ -1,18 +1,19 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using ClockiSlackBot.Config;
 
-namespace ClockiSlackBot
+namespace ClockiSlackBot.Services
 {
-    public class SlackService
+    public class SlackService : ISlackService
     {
         private readonly HttpClient _httpClient;
         private readonly string _triggerUrl;
 
-        public SlackService(HttpClient httpClient, string triggerUrl)
+        public SlackService(HttpClient httpClient, IGameConfig gameConfig)
         {
             _httpClient = httpClient;
-            _triggerUrl = triggerUrl;
+            _triggerUrl = gameConfig.SlackBotTriggerUrl;
         }
 
         public async Task SendMessageAsync(string email, string text)
