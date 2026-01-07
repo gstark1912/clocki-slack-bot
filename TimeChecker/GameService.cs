@@ -11,9 +11,9 @@ namespace ClockiSlackBot
         private readonly IGameStateRepository _stateRepo;
         private readonly IGameFlowOrchestrator _flowOrchestrator;
         private readonly IWeekService _weekService;
-        private readonly LoggerService _logger;
+        private readonly ILoggerService _logger;
 
-        public GameService(IGameStateRepository stateRepo, IGameFlowOrchestrator flowOrchestrator, IWeekService weekService, LoggerService logger)
+        public GameService(IGameStateRepository stateRepo, IGameFlowOrchestrator flowOrchestrator, IWeekService weekService, ILoggerService logger)
         {
             _stateRepo = stateRepo;
             _flowOrchestrator = flowOrchestrator;

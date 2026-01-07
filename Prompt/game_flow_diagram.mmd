@@ -1,32 +1,42 @@
-```mermaid
-flowchart TD
+graph TD
     Start([Inicio de ejecución del Bot]) --> LoadGS[Leer GameState]
     LoadGS --> StateCheck{GameState}
-    StateCheck -- "NotStarted" --> NotStarted[NotStarted]
-    StateCheck -- "InProgress" --> InProgress[InProgress]
-    NotStarted --> ChooseStory[Seleccionar historia de stories.json]
-    ChooseStory --> SendIntro[Enviar intro al canal general]
-    SendIntro --> SetInProg[Actualizar GameState a InProgress]
-    SetInProg --> EndMorning[Fin (ejecución lunes AM)]
-    InProgress --> DailyLogic[CheckDaily (por cada usuario)]
-    subgraph DailyLogicDetail [CheckDaily]
-        CheckHours[Analizar horas de HOY (cerca del fin del día)]
-        CheckHours --> UserStatus{¿Usuario cumplió su meta?}
-        UserStatus -- No --> SendDM[Enviar DM de advertencia narrativa]
+
+    StateCheck -- NotStarted --> NotStarted[NotStarted]
+    StateCheck -- InProgress --> InProgress[InProgress]
+
+    NotStarted --> ChooseStory[Seleccionar historia]
+    ChooseStory --> SendIntro[Enviar intro canal general]
+    SendIntro --> SetInProg[GameState = InProgress]
+    SetInProg --> EndMorning[Fin ejecución lunes AM]
+
+    InProgress --> CheckDailyStart
+
+    subgraph CheckDaily ["CheckDaily (por usuario)"]
+        CheckDailyStart --> CheckHours[Analizar horas de hoy]
+        CheckHours --> UserStatus{Cumplió meta?}
+        UserStatus -- No --> SendDM[Enviar DM advertencia]
         UserStatus -- Sí --> NoAction[Sin acción]
     end
-    DailyLogic --> DailyLogicDetail
-    DailyLogicDetail --> AnteultimoCheck{¿EsAnteultimoDiaDeLaSemana? && Meta < 60%}
-    AnteultimoCheck -- Sí --> SendWarning[Enviar advertencia al canal general]
+
+    NoAction --> AnteultimoCheck
+    SendDM --> AnteultimoCheck
+
+    AnteultimoCheck{Anteúltimo día y meta < 60%?}
+    AnteultimoCheck -- Sí --> SendWarning[Advertencia canal general]
     AnteultimoCheck -- No --> ContinueAfterAnteultimo[Continuar]
-    ContinueAfterAnteultimo --> EndWeekCheck{¿EsUltimoDiaDeLaSemana?}
-    EndWeekCheck -- No --> SaveState[Guardar GameState (mantiene InProgress)]
+
+    SendWarning --> ContinueAfterAnteultimo
+    ContinueAfterAnteultimo --> EndWeekCheck{Último día?}
+
+    EndWeekCheck -- No --> SaveState[Guardar GameState]
     EndWeekCheck -- Sí --> EndWeek[Fin de semana]
-    EndWeek --> VictoryCheck{¿Equipo cumplió la meta semanal?}
+
+    EndWeek --> VictoryCheck{Meta semanal cumplida?}
     VictoryCheck -- Sí --> Win[Victoria]
     VictoryCheck -- No --> Loss[Derrota]
-    Win --> ResetState[Actualizar GameState a NotStarted]
+
+    Win --> ResetState[GameState = NotStarted]
     Loss --> ResetState
     ResetState --> SaveState
-    SaveState --> End([Fin de ejecución del Bot])
-```
+    SaveState --> End([Fin ejecución Bot])

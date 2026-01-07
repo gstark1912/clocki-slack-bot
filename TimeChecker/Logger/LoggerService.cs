@@ -2,7 +2,7 @@ using System;
 
 namespace ClockiSlackBot.Logger
 {
-    public class LoggerService
+    public class LoggerService : ILoggerService
     {
         public void Log(string message)
         {
